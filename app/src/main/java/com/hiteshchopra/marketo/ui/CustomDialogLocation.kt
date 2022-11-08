@@ -1,6 +1,5 @@
 package com.hiteshchopra.marketo.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.hiteshchopra.marketo.R
+
 @Composable
 fun CustomDialogLocation(
     title: String? = "Message",
@@ -53,12 +54,14 @@ fun CustomDialogLocation(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                LocationPermissionLottie(
+                LottieAnimation(
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .height(320.dp)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    resId = R.raw.location
                 )
+
                 //.........................Spacer
                 //.........................Text: title
                 Text(

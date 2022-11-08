@@ -1,6 +1,5 @@
 package com.hiteshchopra.marketo.data.remote.service
 
-import com.hiteshchopra.marketo.data.Constants
 import com.hiteshchopra.marketo.data.remote.model.EventDetailsResponse
 import retrofit2.Retrofit
 import retrofit2.http.GET
