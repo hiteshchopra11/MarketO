@@ -1,9 +1,12 @@
 package com.hiteshchopra.marketo.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -39,10 +42,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.hiteshchopra.marketo.R
+import java.text.DecimalFormat
 import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalUnitApi::class)
@@ -53,6 +58,16 @@ fun EventItem(eventDetails: EventDetailInfo) {
 
     val locationName = remember {
         mutableStateOf("")
+    }
+
+    val df = DecimalFormat("#.##")
+
+    val latitude: Double = remember {
+        df.format(eventDetails.location.latitude).toDouble()
+    }
+
+    val longitude: Double = remember {
+        df.format(eventDetails.location.longitude).toDouble()
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -164,6 +179,19 @@ fun EventItem(eventDetails: EventDetailInfo) {
                         .padding(start = 2.dp, bottom = 4.dp)
                         .size(24.dp)
                         .align(Alignment.Top)
+                        .clickable {
+                            val uri: Uri =
+                                Uri.parse(
+                                    "google.navigation:q="
+                                            + longitude
+                                            + ", "
+                                            + latitude
+                                            + "&mode=d"
+                                )
+                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                            intent.setPackage("com.google.android.apps.maps")
+                            context.startActivity(intent)
+                        }
                 )
             }
 
@@ -195,43 +223,6 @@ fun EventItem(eventDetails: EventDetailInfo) {
                 )
 
                 Spacer(modifier = Modifier.weight(1.0f))
-
-//                var isBookMarked by remember { mutableStateOf(false) }
-//
-//                Crossfade(
-//                    targetState = isBookMarked, animationSpec = tween(
-//                        durationMillis = 1000
-//                    )
-//                ) { bookMarked ->
-//                    when (bookMarked) {
-//                        true -> {
-//                            Image(painter = painterResource(id = R.drawable.ic_bookmark_added),
-//                                contentDescription = "Bookmark added",
-//                                modifier = Modifier
-//                                    .padding(start = 2.dp)
-//                                    .size(32.dp)
-//                                    .align(Alignment.Bottom)
-//                                    .weight(2.0f)
-//                                    .clickable {
-//                                        isBookMarked = false
-//                                    })
-//                        }
-//                        false -> {
-//                            Image(
-//                                painter = painterResource(id = R.drawable.ic_bookmark_add),
-//                                contentDescription = "Add to Bookmark",
-//                                modifier = Modifier
-//                                    .padding(start = 2.dp)
-//                                    .size(32.dp)
-//                                    .weight(2.0f)
-//                                    .align(Alignment.Bottom)
-//                                    .clickable {
-//                                        isBookMarked = true
-//                                    }
-//                            )
-//                        }
-//                    }
-//                }
             }
         }
     }
