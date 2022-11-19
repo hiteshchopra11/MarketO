@@ -40,7 +40,7 @@ fun SplashScreen(modifier: Modifier, navController: NavHostController) {
                 contentScale = ContentScale.FillWidth
             )
             if (logoAnimationState.isAtEnd && logoAnimationState.isPlaying) {
-                navController.navigate(Screen.Home.route) {
+                navController.navigate(Screen.RequestPermission.route) {
                     popUpTo("splash_screen") {
                         inclusive = true
                     }

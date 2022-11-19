@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,10 +32,10 @@ import com.hiteshchopra.marketo.R
 fun CustomDialogLocation(
     title: String? = "Message",
     desc: String? = "Your Message",
-    enableLocation: MutableState<Boolean>,
-    onClick: () -> Unit
+    onPositiveClicked: () -> Unit,
+    onNegativeClicked: () -> Unit
 ) {
-    Dialog(onDismissRequest = { enableLocation.value = false }) {
+    Dialog(onDismissRequest = { onNegativeClicked() }) {
         Box(
             modifier = Modifier
                 .padding(top = 20.dp, bottom = 20.dp)
@@ -99,7 +98,9 @@ fun CustomDialogLocation(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 32.dp, end = 32.dp),
-                    onClick = onClick,
+                    onClick = {
+                        onPositiveClicked()
+                    },
                     contentPadding = PaddingValues(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent
@@ -129,7 +130,7 @@ fun CustomDialogLocation(
 
 
                 TextButton(onClick = {
-                    enableLocation.value = false
+                    onNegativeClicked()
                 }) { Text("Cancel", style = MaterialTheme.typography.labelLarge) }
 
 

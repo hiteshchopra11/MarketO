@@ -1,11 +1,9 @@
 package com.hiteshchopra.marketo.ui.navigation
 
-
-import android.Manifest
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +19,14 @@ import com.hiteshchopra.marketo.ui.home.HomeScreenVM
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SetupNavGraph(navController: NavHostController, homeScreenVM: HomeScreenVM) {
+fun SetupNavGraph(
+    navController: NavHostController,
+    homeScreenVM: HomeScreenVM,
+    closeApp: () -> Unit
+) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Splash.route
     ) {
         composable(route = Screen.Splash.route) {
             SplashScreen(
@@ -32,15 +34,33 @@ fun SetupNavGraph(navController: NavHostController, homeScreenVM: HomeScreenVM) 
                 navController = navController
             )
         }
-        composable(route = Screen.Home.route) {
+        composable(
+            route = Screen.Home.route
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-//                RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION)
-                HomeScreen(homeScreenVM = homeScreenVM)
+                HomeScreen(
+                    homeScreenVM = homeScreenVM,
+                    closeApp = closeApp
+                )
+            }
+        }
+
+        composable(route = Screen.RequestPermission.route) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                RequestPermission(
+                    homeScreenVM = homeScreenVM,
+                    navController = navController
+                )
             }
         }
     }

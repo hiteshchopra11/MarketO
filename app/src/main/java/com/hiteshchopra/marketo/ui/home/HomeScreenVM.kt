@@ -1,86 +1,117 @@
 package com.hiteshchopra.marketo.ui.home
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.IdRes
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.hiteshchopra.marketo.R
-import com.hiteshchopra.marketo.domain.SafeResult
 import com.hiteshchopra.marketo.domain.model.EventDetailsEntity
 import com.hiteshchopra.marketo.domain.usecase.GetEventDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.debounce
 
-@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeScreenVM @Inject constructor(
     private val eventDetailsUseCase: GetEventDetailsUseCase
 ) : ViewModel() {
 
-    /* StateFlow for publishing/observing the UI changes to Fragment */
-    init {
-        getEvents()
-    }
-
     private val _viewState = MutableStateFlow<ViewState>(ViewState.Loading)
     val viewState: StateFlow<ViewState> = _viewState
 
-    private fun getEvents() {
-        viewModelScope.launch {
-            val result = eventDetailsUseCase.perform()
-            when (result) {
-                is SafeResult.Failure -> {
-                    _viewState.value = ViewState.Failure(result.exception)
-                }
-                SafeResult.NetworkError -> {
-                    _viewState.value = ViewState.NetworkError
-                }
-                is SafeResult.Success -> {
-                    val abc = fetchEventDetailsInfo(result.data as? EventDetailsEntity)
-                    Log.d("TAG123", abc.toString())
-                    _viewState.value =
-                        ViewState.SuccessWithData(fetchEventDetailsInfo(result.data as? EventDetailsEntity))
-                }
+    private var locationDetails: LocationDetails? = null
+
+    fun setLocationDetails(location: LocationDetails) {
+        Log.d("TAG123 SET",locationDetails.toString())
+        locationDetails = location
+    }
+
+    fun getLocationDetails(): LocationDetails? {
+        Log.d("TAG123 GET",locationDetails.toString())
+        return locationDetails
+    }
+
+    fun categorySelected(eventCategory: String) {
+        when (eventCategory) {
+            EventCategory.CONFERENCES -> {
+                R.drawable.conferences
+            }
+            EventCategory.CONCERTS -> {
+                R.drawable.concert
+            }
+            EventCategory.PERFORMING_ARTS -> {
+                R.drawable.performing_arts
+            }
+            EventCategory.SPORTS -> {
+                R.drawable.sports
+            }
+            EventCategory.COMMUNITY -> {
+                R.drawable.community
+            }
+            else -> {
+                R.drawable.default_event
             }
         }
     }
 
+    fun getEvents(
+        state: String,
+        category: String? = null,
+        countryCode: String,
+        debounce: Long = 0
+    ): Flow<PagingData<EventDetailsEntity.Result>> {
+        val timeZone = Calendar.getInstance().timeZone.getDisplayName(false, TimeZone.SHORT)
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    private fun fetchEventDetailsInfo(eventDetailsEntity: EventDetailsEntity?): List<EventDetailInfo?> {
-        return eventDetailsEntity?.results?.map { eventDetails ->
-            val coverImage: Int = fetchCoverImage(eventCategory = eventDetails?.category)
-            val level = fetchLocalLevel(localLevel = eventDetails?.localRank)
-            val duration = getEventDuration(duration = eventDetails?.duration?.toLong())
-            val startDate = fetchDate(time = eventDetails?.start)
-            val endDate = fetchDate(time = eventDetails?.end)
-            EventDetailInfo(
-                localRankLevel = level,
-                id = eventDetails?.id.orEmpty(),
-                coverPhoto = coverImage,
-                title = eventDetails?.title.orEmpty(),
-                description = eventDetails?.description.orEmpty(),
-                category = eventDetails?.category.orEmpty(),
-                label = eventDetails?.labels.orEmpty(),
-                attendance = eventDetails?.phqAttendance ?: 0,
-                duration = duration,
-                startDate = startDate,
-                endDate = endDate,
-                timeZone = eventDetails?.timezone.orEmpty(),
-                location = LatitudeLongitude(
-                    latitude = eventDetails?.location?.first() ?: 0.0,
-                    longitude = eventDetails?.location?.get(1) ?: 0.0
-                ),
-                country = eventDetails?.country.orEmpty()
+
+        return eventDetailsUseCase.perform(
+            GetEventDetailsUseCase.Parameters(
+                category = category,
+                countryCode = locationDetails?.countryCode ?: countryCode,
+                timeZone = timeZone,
+                date = currentDate,
+                state = state
             )
-        } ?: arrayListOf()
+        ).debounce(debounce).cachedIn(viewModelScope)
     }
+
+    fun fetchEventDetailsInfo(eventDetails: EventDetailsEntity.Result?): EventDetailInfo {
+        val coverImage: Int = fetchCoverImage(eventCategory = eventDetails?.category)
+        val level = fetchLocalLevel(localLevel = eventDetails?.localRank)
+        val duration = getEventDuration(duration = eventDetails?.duration?.toLong())
+        val startDate = fetchDate(time = eventDetails?.start)
+        val endDate = fetchDate(time = eventDetails?.end)
+        return EventDetailInfo(
+            localRankLevel = level,
+            id = eventDetails?.id.orEmpty(),
+            coverPhoto = coverImage,
+            title = eventDetails?.title.orEmpty(),
+            description = eventDetails?.description.orEmpty(),
+            category = eventDetails?.category.orEmpty(),
+            label = eventDetails?.labels.orEmpty(),
+            attendance = eventDetails?.phqAttendance ?: 0,
+            duration = duration,
+            startDate = startDate,
+            endDate = endDate,
+            timeZone = eventDetails?.timezone.orEmpty(),
+            location = LatitudeLongitude(
+                latitude = eventDetails?.location?.get(0) ?: 0.0,
+                longitude = eventDetails?.location?.get(1) ?: 0.0
+            ),
+            country = eventDetails?.country.orEmpty()
+        )
+    }
+
 
     private fun fetchLocalLevel(localLevel: Int?): Level {
         return when (localLevel) {
@@ -151,6 +182,10 @@ class HomeScreenVM @Inject constructor(
         val year = dateTime.year
         return "$day ${month}, $year"
     }
+
+    private fun fetchTodayDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    }
 }
 
 
@@ -160,3 +195,12 @@ sealed class ViewState {
     class Failure(val exception: Exception? = null) : ViewState()
     object NetworkError : ViewState()
 }
+
+data class LocationDetails(
+    val completeAddress: String,
+    val city: String,
+    val latitudeLongitude: LatitudeLongitude,
+    val postalCode: String,
+    val country: String,
+    val countryCode: String
+)

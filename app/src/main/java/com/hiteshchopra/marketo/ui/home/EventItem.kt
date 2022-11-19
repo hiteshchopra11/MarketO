@@ -1,15 +1,9 @@
 package com.hiteshchopra.marketo.ui.home
 
-import android.content.Context
-import android.location.Address
-import android.location.Geocoder
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -28,10 +22,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,13 +39,36 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.hiteshchopra.marketo.R
-import java.time.ZonedDateTime
 import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalUnitApi::class)
 @Composable
 fun EventItem(eventDetails: EventDetailInfo) {
+
+    val context = LocalContext.current
+
+    val locationName = remember {
+        mutableStateOf("")
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = true) {
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                locationName.value = getCityNameWithLocation(
+                    context = context,
+                    lat = eventDetails.location.latitude,
+                    long = eventDetails.location.longitude
+                )
+            }
+        }
+    }
+
     ElevatedCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
@@ -64,9 +80,6 @@ fun EventItem(eventDetails: EventDetailInfo) {
             .clip(RoundedCornerShape(8.dp))
             .background(color = Color.White)
     ) {
-
-        val context = LocalContext.current
-
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -115,7 +128,7 @@ fun EventItem(eventDetails: EventDetailInfo) {
                     )
 
                     Row(
-                        modifier = Modifier.width(IntrinsicSize.Max)
+                        modifier = Modifier
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_location_grey),
@@ -134,11 +147,7 @@ fun EventItem(eventDetails: EventDetailInfo) {
                             modifier = Modifier
                                 .padding(start = 2.dp, bottom = 4.dp)
                                 .align(Alignment.CenterVertically),
-                            text = getCityNameWithLocation(
-                                context = context,
-                                lat = eventDetails.location.latitude,
-                                long = eventDetails.location.longitude
-                            ),
+                            text = locationName.value,
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -187,42 +196,42 @@ fun EventItem(eventDetails: EventDetailInfo) {
 
                 Spacer(modifier = Modifier.weight(1.0f))
 
-                var isBookMarked by remember { mutableStateOf(false) }
-
-                Crossfade(
-                    targetState = isBookMarked, animationSpec = tween(
-                        durationMillis = 1000
-                    )
-                ) { bookMarked ->
-                    when (bookMarked) {
-                        true -> {
-                            Image(painter = painterResource(id = R.drawable.ic_bookmark_added),
-                                contentDescription = "Bookmark added",
-                                modifier = Modifier
-                                    .padding(start = 2.dp)
-                                    .size(32.dp)
-                                    .align(Alignment.Bottom)
-                                    .weight(2.0f)
-                                    .clickable {
-                                        isBookMarked = false
-                                    })
-                        }
-                        false -> {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_bookmark_add),
-                                contentDescription = "Add to Bookmark",
-                                modifier = Modifier
-                                    .padding(start = 2.dp)
-                                    .size(32.dp)
-                                    .weight(2.0f)
-                                    .align(Alignment.Bottom)
-                                    .clickable {
-                                        isBookMarked = true
-                                    }
-                            )
-                        }
-                    }
-                }
+//                var isBookMarked by remember { mutableStateOf(false) }
+//
+//                Crossfade(
+//                    targetState = isBookMarked, animationSpec = tween(
+//                        durationMillis = 1000
+//                    )
+//                ) { bookMarked ->
+//                    when (bookMarked) {
+//                        true -> {
+//                            Image(painter = painterResource(id = R.drawable.ic_bookmark_added),
+//                                contentDescription = "Bookmark added",
+//                                modifier = Modifier
+//                                    .padding(start = 2.dp)
+//                                    .size(32.dp)
+//                                    .align(Alignment.Bottom)
+//                                    .weight(2.0f)
+//                                    .clickable {
+//                                        isBookMarked = false
+//                                    })
+//                        }
+//                        false -> {
+//                            Image(
+//                                painter = painterResource(id = R.drawable.ic_bookmark_add),
+//                                contentDescription = "Add to Bookmark",
+//                                modifier = Modifier
+//                                    .padding(start = 2.dp)
+//                                    .size(32.dp)
+//                                    .weight(2.0f)
+//                                    .align(Alignment.Bottom)
+//                                    .clickable {
+//                                        isBookMarked = true
+//                                    }
+//                            )
+//                        }
+//                    }
+//                }
             }
         }
     }

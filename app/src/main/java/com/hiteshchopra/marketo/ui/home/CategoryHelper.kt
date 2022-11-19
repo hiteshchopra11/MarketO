@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateListOf
 class CategoryHelper {
 
     val categoryItemLists = mutableStateListOf(
-        CategoryItem(1, "All"),
-        CategoryItem(2, "Concerts"),
-        CategoryItem(3, "Conferences"),
+        CategoryItem(1, EventCategory.ALL.capitaliseFirstLetter(), true),
+        CategoryItem(2, EventCategory.CONFERENCES.capitaliseFirstLetter()),
+        CategoryItem(3, EventCategory.CONCERTS.capitaliseFirstLetter()),
+        CategoryItem(4, EventCategory.SPORTS.capitaliseFirstLetter()),
+        CategoryItem(5, EventCategory.PERFORMING_ARTS.capitaliseFirstLetter()),
+        CategoryItem(6, EventCategory.COMMUNITY.capitaliseFirstLetter()),
     )
 
     fun onItemSelected(selectedCategoryItem: CategoryItem) {

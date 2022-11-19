@@ -49,6 +49,7 @@ annotation class EventCategory {
         const val PERFORMING_ARTS = "performing-arts"
         const val SPORTS = "sports"
         const val COMMUNITY = "community"
+        const val ALL = "all"
     }
 }
 
@@ -57,9 +58,9 @@ data class LatitudeLongitude(
     val longitude: Double
 )
 
-fun getCityNameWithLocation(context: Context, lat: Double, long: Double): String {
+suspend fun getCityNameWithLocation(context: Context, lat: Double, long: Double): String {
     var location = "N/A"
-    Geocoder(context, Locale("in")).getAddress(lat, long) { address: Address? ->
+    Geocoder(context, Locale("in")).getAddress(long, lat) { address: Address? ->
         if (address != null) {
             location = address.getAddressLine(0)
         }

@@ -10,8 +10,24 @@ class EventDetailsDetailsRepo(
     private val eventsRemoteSource: IEventsRemoteSource,
     private val eventDetailsMapper: EventDetailsMapper
 ) : IEventsDetailsRepo {
-    override suspend fun getEvents(): SafeResult<EventDetailsEntity> {
-        return when (val response = eventsRemoteSource.getEventDetails()) {
+    override suspend fun getEvents(
+        category: String?,
+        countryCode: String,
+        timeZone: String,
+        date: String,
+        state: String,
+        offset: Int,
+        limit: Int
+    ): SafeResult<EventDetailsEntity> {
+        return when (val response = eventsRemoteSource.getEventDetails(
+            category = category,
+            countryCode = countryCode,
+            timeZone = timeZone,
+            date = date,
+            state = state,
+            offset = offset,
+            limit = limit
+        )) {
             is SafeResult.Success -> SafeResult.Success(eventDetailsMapper.mapToDomain(response.data))
             is SafeResult.Failure -> SafeResult.Failure(response.exception)
             is SafeResult.NetworkError -> SafeResult.NetworkError
