@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
 }
 
 def localProperties = new Properties()
@@ -121,5 +122,6 @@ dependencies {
     implementation "androidx.paging:paging-runtime:3.1.1"
     implementation "androidx.paging:paging-compose:1.0.0-alpha17"
 
-    implementation("androidx.compose.runtime:runtime-tracing:1.0.0-alpha01")
+   /* GSON */
+    implementation 'com.google.code.gson:gson:2.10'
 }

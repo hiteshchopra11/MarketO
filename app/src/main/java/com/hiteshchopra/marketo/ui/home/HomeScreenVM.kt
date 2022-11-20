@@ -16,8 +16,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 
 @OptIn(FlowPreview::class)
@@ -26,18 +24,13 @@ class HomeScreenVM @Inject constructor(
     private val eventDetailsUseCase: GetEventDetailsUseCase
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow<ViewState>(ViewState.Loading)
-    val viewState: StateFlow<ViewState> = _viewState
-
     private var locationDetails: LocationDetails? = null
 
     fun setLocationDetails(location: LocationDetails) {
-        Log.d("TAG123 SET",locationDetails.toString())
         locationDetails = location
     }
 
     fun getLocationDetails(): LocationDetails? {
-        Log.d("TAG123 GET",locationDetails.toString())
         return locationDetails
     }
 
@@ -95,20 +88,20 @@ class HomeScreenVM @Inject constructor(
             localRankLevel = level,
             id = eventDetails?.id.orEmpty(),
             coverPhoto = coverImage,
-            title = eventDetails?.title.orEmpty(),
-            description = eventDetails?.description.orEmpty(),
-            category = eventDetails?.category.orEmpty(),
+            title = eventDetails?.title.orNA(),
+            description = eventDetails?.description.orNA(),
+            category = eventDetails?.category.orNA(),
             label = eventDetails?.labels.orEmpty(),
             attendance = eventDetails?.phqAttendance ?: 0,
             duration = duration,
             startDate = startDate,
             endDate = endDate,
-            timeZone = eventDetails?.timezone.orEmpty(),
+            timeZone = eventDetails?.timezone.orNA(),
             location = LatitudeLongitude(
                 latitude = eventDetails?.location?.get(0) ?: 0.0,
                 longitude = eventDetails?.location?.get(1) ?: 0.0
             ),
-            country = eventDetails?.country.orEmpty()
+            country = eventDetails?.country.orNA()
         )
     }
 

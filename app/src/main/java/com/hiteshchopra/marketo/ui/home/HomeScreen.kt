@@ -1,12 +1,14 @@
 package com.hiteshchopra.marketo.ui.home
 
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,22 +40,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.gson.Gson
 import com.hiteshchopra.marketo.R
 import com.hiteshchopra.marketo.domain.model.EventDetailsEntity
 import com.hiteshchopra.marketo.ui.LottieAnimation
+import com.hiteshchopra.marketo.ui.navigation.Screen
 import java.util.*
 import kotlinx.coroutines.flow.Flow
 
 
 @Composable
 fun HomeScreen(
-    homeScreenVM: HomeScreenVM, closeApp: () -> Unit
+    navController: NavController,
+    homeScreenVM: HomeScreenVM,
+    closeApp: () -> Unit
 ) {
     val context = LocalContext.current
     val systemUiController = rememberSystemUiController()
@@ -74,9 +81,15 @@ fun HomeScreen(
     val upcomingEvents = events.value.collectAsLazyPagingItems()
 
     EventsScreenUI(
-        pagingEvents = upcomingEvents, fetchEventDetailsInfo = {
+        pagingEvents = upcomingEvents,
+        fetchEventDetailsInfo = {
             homeScreenVM.fetchEventDetailsInfo(it)
-        }, homeScreenVM = homeScreenVM, context = context, events = events, location = location
+        },
+        homeScreenVM = homeScreenVM,
+        context = context,
+        events = events,
+        location = location,
+        navController = navController
     )
 
     DisposableEffect(systemUiController) {
@@ -109,7 +122,8 @@ private fun EventsScreenUI(
     homeScreenVM: HomeScreenVM,
     context: Context,
     events: MutableState<Flow<PagingData<EventDetailsEntity.Result>>>,
-    location: LocationDetails?
+    location: LocationDetails?,
+    navController: NavController
 ) {
 
 
@@ -235,6 +249,11 @@ private fun EventsScreenUI(
                 }) { event ->
                     event?.let { eventDetails ->
                         EventItem(
+                            modifier = Modifier.clickable {
+                                val json =
+                                    Uri.encode(Gson().toJson(fetchEventDetailsInfo(eventDetails)))
+                                navController.navigate("${Screen.EventDetails.route}/${json}")
+                            },
                             eventDetails = fetchEventDetailsInfo(
                                 eventDetails
                             )

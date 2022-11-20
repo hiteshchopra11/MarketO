@@ -4,9 +4,11 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.os.Build
+import android.os.Parcelable
 import android.util.Log
 import androidx.annotation.StringDef
 import java.util.*
+import kotlinx.parcelize.Parcelize
 
 
 @Suppress("DEPRECATION")
@@ -53,10 +55,11 @@ annotation class EventCategory {
     }
 }
 
+@Parcelize
 data class LatitudeLongitude(
     val latitude: Double,
     val longitude: Double
-)
+) : Parcelable
 
 suspend fun getCityNameWithLocation(context: Context, lat: Double, long: Double): String {
     var location = "N/A"

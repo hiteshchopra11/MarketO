@@ -1,6 +1,7 @@
 package com.hiteshchopra.marketo.ui.navigation
 
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,12 +12,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.hiteshchopra.marketo.ui.RequestPermission
 import com.hiteshchopra.marketo.ui.SplashScreen
+import com.hiteshchopra.marketo.ui.home.EventDetailInfo
+import com.hiteshchopra.marketo.ui.home.EventDetailInfoType
+import com.hiteshchopra.marketo.ui.home.EventDetailsUI
 import com.hiteshchopra.marketo.ui.home.HomeScreen
 import com.hiteshchopra.marketo.ui.home.HomeScreenVM
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SetupNavGraph(
@@ -44,6 +50,7 @@ fun SetupNavGraph(
                 contentAlignment = Alignment.Center
             ) {
                 HomeScreen(
+                    navController = navController,
                     homeScreenVM = homeScreenVM,
                     closeApp = closeApp
                 )
@@ -61,6 +68,16 @@ fun SetupNavGraph(
                     homeScreenVM = homeScreenVM,
                     navController = navController
                 )
+            }
+        }
+
+        composable(
+            route = Screen.EventDetails.route + "/{eventDetailsInfo}",
+            arguments = listOf(navArgument("eventDetailsInfo") { type = EventDetailInfoType() })
+        ) {
+            val eventDetailInfo = it.arguments?.getParcelable<EventDetailInfo>("eventDetailsInfo")
+            if (eventDetailInfo != null) {
+                EventDetailsUI(eventDetails = eventDetailInfo)
             }
         }
     }

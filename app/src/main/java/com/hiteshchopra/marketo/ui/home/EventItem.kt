@@ -52,7 +52,7 @@ import kotlinx.coroutines.withContext
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalUnitApi::class)
 @Composable
-fun EventItem(eventDetails: EventDetailInfo) {
+fun EventItem(modifier: Modifier, eventDetails: EventDetailInfo) {
 
     val context = LocalContext.current
 
@@ -88,7 +88,7 @@ fun EventItem(eventDetails: EventDetailInfo) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         shape = CardDefaults.shape,
-        modifier = Modifier
+        modifier = modifier
             .height(200.dp)
             .fillMaxWidth()
             .padding(16.dp)
